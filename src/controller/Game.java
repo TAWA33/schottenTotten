@@ -17,12 +17,16 @@ public class Game {
     public void start() {
         System.out.println("Welcome on Schotten Totten !");
         int choice = Menu.showMenu(scanner);
-        Player p1 = new Player("Player 1", false);
+
+        String p1Name = askPlayerName("Player 1");
+        Player p1 = new Player(p1Name, false);
+
         Player p2;
         if (choice == 2) {
             p2 = new Bot("AI");
         } else {
-            p2 = new Player("Player 2", false);
+            String p2Name = askPlayerName("Player 2");
+            p2 = new Player(p2Name, false);
         }
         state.addPlayer(p1);
         state.addPlayer(p2);
@@ -92,7 +96,9 @@ public class Game {
                     System.out.println("Invalid limit index.");
                     continue;
                 }
-                playMove(current, cardIndex, limitIndex);
+                if (playMove(current, cardIndex, limitIndex) == 0){
+                    continue;
+                }
             }
 
             checkWin();
@@ -103,17 +109,26 @@ public class Game {
             }
         }
 
-        System.out.println("Good Game ! Winner: " + state.getWinner());
+        System.out.println("Good Game ! Winner: " + state.getWinner().getName() + " !!");
     }
 
-    private void playMove(Player player, int cardIndex, int limitIndex) {
+    private String askPlayerName(String defaultName) {
+        System.out.print("Enter player name (" + defaultName + ") : ");
+        String name = scanner.nextLine().trim();
+        if (name.isEmpty()) {
+            return defaultName;
+        }
+        return name;
+    }
+
+    private int playMove(Player player, int cardIndex, int limitIndex) {
         Card card = player.removeCardFromHand(cardIndex);
         int playerIndex = state.getPlayers().indexOf(player) + 1; // 1 or 2
         Limit limit = state.getLimits().get(limitIndex);
         if (limit.isFull(playerIndex)) {
             System.out.println("This zone is full !");
             player.addCardToHand(card); // put the card back
-            return;
+            return 0; // Player have to play again
         }
         limit.addCard(playerIndex, card);
         limit.evaluate();
@@ -125,6 +140,7 @@ public class Game {
         }
 
         System.out.println(player.getName() + " plays " + card + " on limit " + (limitIndex + 1));
+        return 1;
     }
 
     private void checkWin() {

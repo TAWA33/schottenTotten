@@ -38,6 +38,8 @@ public class Grid_Display {
 
         System.out.println();
         System.out.println();
+        System.out.println();
+        System.out.println();
         System.out.println("==================== GAME BOARD ====================");
 
         // Header : Number of limit
@@ -121,7 +123,9 @@ public class Grid_Display {
     }
 
     private static String cell(Card c) {
-        if (c == null) return "  [  ]  ";
+        if (c == null){
+            return "  [  ]  ";
+        }
         String visible = "[" + shortColor(c.getColor()) + c.getValue() + "]";
         return "  " + colorize(visible, c.getColor()) + "  ";
     }

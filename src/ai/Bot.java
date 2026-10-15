@@ -18,18 +18,15 @@ public class Bot extends Player {
         int handSize = current.getHand().getNbCards();
         if (handSize == 0) return new int[]{-1, -1};
 
-        List<Limit> limits = state.getLimits();
-        List<Integer> validLimits = new ArrayList<>();
-        int playerIndex = state.getCurrentPlayerIndex() + 1; // 1 or 2
-        for (int i = 0; i < limits.size(); i++) {
-            if (!limits.get(i).isFull(playerIndex)) {
-                validLimits.add(i);
-            }
+        int playerIndex = state.getCurrentPlayerIndex() + 1;
+        List<Integer> validLimits = state.getValidLimits(playerIndex);
+        if (validLimits.isEmpty()){
+            return new int[]{-1, -1};
         }
-        if (validLimits.isEmpty()) return new int[]{-1, -1};
 
         int cardIndex = random.nextInt(handSize);
         int limitIndex = validLimits.get(random.nextInt(validLimits.size()));
         return new int[]{cardIndex, limitIndex};
     }
+
 }

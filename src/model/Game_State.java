@@ -37,6 +37,17 @@ public class Game_State {
     public List<Limit> getLimits() { 
         return limits;
     }
+    
+    public List<Integer> getValidLimits(int playerIndex) {
+        List<Integer> validLimits = new ArrayList<>();
+        for (int i = 0; i < limits.size(); i++) {
+            if (!limits.get(i).isFull(playerIndex)) {
+                validLimits.add(i);
+            }
+        }
+        return validLimits;
+    }
+
     public void addLimit(Limit l) {
         limits.add(l);
     }
@@ -52,8 +63,11 @@ public class Game_State {
     public void setGameOver(boolean gameOver) {
         this.gameOver = gameOver;
     }
-    public int getWinner() {
-        return winner;
+    public Player getWinner() {
+        if (winner == 0) {
+            throw new IllegalStateException("No winner yet.");
+        }
+        return players.get(winner - 1);
     }
     public void setWinner(int winner) {
         this.winner = winner;
