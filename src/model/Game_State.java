@@ -41,7 +41,7 @@ public class Game_State {
     public List<Integer> getValidLimits(int playerIndex) {
         List<Integer> validLimits = new ArrayList<>();
         for (int i = 0; i < limits.size(); i++) {
-            if (!limits.get(i).isFull(playerIndex)) {
+            if (limits.get(i).getControl() == 0 && !limits.get(i).isFull(playerIndex)) {
                 validLimits.add(i);
             }
         }
@@ -56,6 +56,17 @@ public class Game_State {
     }
     public void setDeck(Deck deck) {
         this.deck = deck;
+    }
+    public void updateClaims() {
+        for (int player = 1; player <= 2; player++) {
+            List<Card> unknown = deck.getCards(); // Deck
+            unknown.addAll(players.get(2 - player).getHand().getCards()); // Opponent Hand
+            for (Limit l : limits) {
+                if (l.claim(player, unknown)) {
+                    System.out.println("Limit " + (l.getIndex() + 1) + " claimed by " + players.get(player - 1).getName());
+                }
+            }
+        }
     }
     public boolean isGameOver() {
         return gameOver;

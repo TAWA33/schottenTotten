@@ -32,6 +32,10 @@ public class Limit {
         return zones[playerIndex - 1]; // playerIndex 1 or 2
     }
 
+    public int getFirstToComplete(){
+        return firstToComplete;
+    }
+
     public boolean isFull(int playerIndex) {
         return getZone(playerIndex).getNbCards() >= 3;
     }
@@ -58,11 +62,11 @@ public class Limit {
                 control = firstToComplete;
             }
         } else {
-            control = 0; // Cannot make the choice
+            //control = 0; // Cannot make the choice
         }
     }
 
-    private int evaluateCombination(Card_Combinaison zone) {
+    public static int evaluateCombination(Card_Combinaison zone) {
         List<Card> cards = zone.getCards();
         if (cards.size() != 3){
             return 0;
@@ -90,6 +94,52 @@ public class Limit {
         } else {
             return 1000 + v1 + v2 + v3; // Somme
         }
+    }
+
+    public boolean canClaim(int player, List<Card> unknown) {
+        if (control != 0 || !isFull(player)){
+            return false;
+        }
+
+        int opp = 3 - player;
+        int myScore = evaluateCombination(getZone(player));
+        List<Card> oppCards = getZone(opp).getCards();
+        int missing = 3 - oppCards.size();
+
+        if (missing == 0) { // 2 zones are full !
+            int oppScore = evaluateCombination(getZone(opp));
+            if (myScore != oppScore){
+                return myScore > oppScore;
+            }
+            return firstToComplete == player;
+        }
+        return !canBeat(oppCards, unknown, 0, missing, myScore);
+    }
+
+    public boolean claim(int player, List<Card> unknown) {
+        if (canClaim(player, unknown)) {
+            control = player;
+            return true;
+        }
+        return false;
+    }
+
+    // Backtracking Algorithm : https://en.wikipedia.org/wiki/Backtracking
+    private static boolean canBeat(List<Card> current, List<Card> pool, int start, int missing, int target) {
+        // We try to add to "current" (cards in the limit zone), Unknown cards "pool" (from the deck or cards in the hand of the opponent) 
+        
+        if (missing == 0) { // zone is full we can compare the 2 zones
+            return evaluateCombination(new Card_Combinaison(current)) > target; // Return if the opponent can beat the target ( = score of the current player)
+        }
+        for (int i = start; i < pool.size(); i++) { // The opponent zone is not full so we have to add 1 or more cards 
+            current.add(pool.get(i));
+            boolean beat = canBeat(current, pool, i + 1, missing - 1, target); // Recursive call with one fewer card to add (missing - 1) and start = i + 1 to avoid reusing the same card
+            current.remove(current.size() - 1); // We remove the card ( = back track). Come back to the initial version
+            if (beat){
+                return true; // We found a better possible combination => The player cannot claim the limit
+            }
+        }
+        return false;
     }
 
     @Override

@@ -125,6 +125,11 @@ public class Game {
         Card card = player.removeCardFromHand(cardIndex);
         int playerIndex = state.getPlayers().indexOf(player) + 1; // 1 or 2
         Limit limit = state.getLimits().get(limitIndex);
+        if (limit.getControl() != 0) {
+            System.out.println("This limit is already claimed !");
+            player.addCardToHand(card);
+            return 0;
+        }
         if (limit.isFull(playerIndex)) {
             System.out.println("This zone is full !");
             player.addCardToHand(card); // put the card back
@@ -138,8 +143,8 @@ public class Game {
         } else {
             System.out.println("Empty Deck.");
         }
-
         System.out.println(player.getName() + " plays " + card + " on limit " + (limitIndex + 1));
+        state.updateClaims();
         return 1;
     }
 
