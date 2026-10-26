@@ -1,10 +1,10 @@
-package MAIN.COM.schttttt_game.ai;
+package main.com.schttttt_game.ai;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import MAIN.COM.schttttt_game.model.*;
+import main.com.schttttt_game.model.*;
 
 public class Bot extends Player {
     private Random random = new Random();

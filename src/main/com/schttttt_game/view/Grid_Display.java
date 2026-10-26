@@ -1,8 +1,8 @@
-package MAIN.COM.schttttt_game.view;
+package main.com.schttttt_game.view;
 
 import java.util.List;
 
-import MAIN.COM.schttttt_game.model.*;
+import main.com.schttttt_game.model.*;
 
 public class Grid_Display {
 
@@ -105,7 +105,7 @@ public class Grid_Display {
         } else {
             for (int i = 0; i < p.getHand().getNbCards(); i++) {
                 Card c = p.getHand().getCard(i);
-                sb.append("[").append(i).append("] ")
+                sb.append("[").append(i+1).append("] ")
                   .append(colorize(shortColor(c.getColor()) + c.getValue(), c.getColor()))
                   .append("  ");
             }

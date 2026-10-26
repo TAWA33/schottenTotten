@@ -1,4 +1,4 @@
-package MAIN.COM.schttttt_game.model;
+package main.com.schttttt_game.model;
 
 import java.util.ArrayList;
 import java.util.Collections;

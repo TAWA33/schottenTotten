@@ -1,10 +1,10 @@
-package MAIN.COM.schttttt_game.controller;
+package main.com.schttttt_game.controller;
 
 import java.util.Scanner;
 
-import MAIN.COM.schttttt_game.ai.Bot;
-import MAIN.COM.schttttt_game.model.*;
-import MAIN.COM.schttttt_game.view.*;
+import main.com.schttttt_game.ai.Bot;
+import main.com.schttttt_game.model.*;
+import main.com.schttttt_game.view.*;
 
 public class Game {
     private Game_State state;
@@ -68,7 +68,7 @@ public class Game {
                 Grid_Display.displayHand(current);
                 Grid_Display.displayLegend();
 
-                System.out.print("Enter the number of the card (0-5) or 'q' to quit: ");
+                System.out.print("Enter the number of the card (1-6) or 'q' to quit: ");
                 String input = scanner.nextLine();
                 if (input.equalsIgnoreCase("q")) {
                     System.out.println("Thank you for playing !");
@@ -76,7 +76,7 @@ public class Game {
                 }
                 int cardIndex;
                 try {
-                    cardIndex = Integer.parseInt(input);
+                    cardIndex = Integer.parseInt(input)-1;
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid entry.");
                     continue;

@@ -1,4 +1,4 @@
-package MAIN.COM.schttttt_game.view;
+package main.com.schttttt_game.view;
 
 import java.util.Scanner;
 

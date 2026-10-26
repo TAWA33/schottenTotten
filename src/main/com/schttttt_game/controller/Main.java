@@ -1,4 +1,4 @@
-package MAIN.COM.schttttt_game.controller;
+package main.com.schttttt_game.controller;
 
 public class Main {
     public static void main(String[] args) {
