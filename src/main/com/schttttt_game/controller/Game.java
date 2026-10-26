@@ -150,38 +150,10 @@ public class Game {
     }
 
     private void checkWin() {
-        // Victory if 3 adjacent limits or 5limits in total for a player
-        int control1 = 0, control2 = 0;
-        int consecutive1 = 0, consecutive2 = 0;
-        int maxConsecutive1 = 0, maxConsecutive2 = 0;
-
-        for (Limit l : state.getLimits()) {
-            if (l.getControl() == 1) {
-                control1++;
-                consecutive1++;
-                if (consecutive1 > maxConsecutive1){
-                    maxConsecutive1 = consecutive1;
-                }
-            } else {
-                consecutive1 = 0;
-            }
-            if (l.getControl() == 2) {
-                control2++;
-                consecutive2++;
-                if (consecutive2 > maxConsecutive2){
-                    maxConsecutive2 = consecutive2;
-                }
-            } else {
-                consecutive2 = 0;
-            }
-        }
-
-        if (control1 >= 5 || maxConsecutive1 >= 3) {
+        int w = state.computeWinner();
+        if (w != 0) {
             state.setGameOver(true);
-            state.setWinner(1);
-        } else if (control2 >= 5 || maxConsecutive2 >= 3) {
-            state.setGameOver(true);
-            state.setWinner(2);
+            state.setWinner(w);
         }
     }
 }

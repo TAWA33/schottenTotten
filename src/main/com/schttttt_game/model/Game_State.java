@@ -75,6 +75,40 @@ public class Game_State {
     public void setGameOver(boolean gameOver) {
         this.gameOver = gameOver;
     }
+    public int computeWinner(){
+        // Victory if 3 adjacent limits or 5limits in total for a player
+        int control1 = 0, control2 = 0;
+        int consecutive1 = 0, consecutive2 = 0;
+        int maxConsecutive1 = 0, maxConsecutive2 = 0;
+
+        for (Limit l : getLimits()) {
+            if (l.getControl() == 1) {
+                control1++;
+                consecutive1++;
+                if (consecutive1 > maxConsecutive1){
+                    maxConsecutive1 = consecutive1;
+                }
+            } else {
+                consecutive1 = 0;
+            }
+            if (l.getControl() == 2) {
+                control2++;
+                consecutive2++;
+                if (consecutive2 > maxConsecutive2){
+                    maxConsecutive2 = consecutive2;
+                }
+            } else {
+                consecutive2 = 0;
+            }
+        }
+
+        if (control1 >= 5 || maxConsecutive1 >= 3) {
+            return 1;
+        } else if (control2 >= 5 || maxConsecutive2 >= 3) {
+            return 2;
+        }
+        return 0;        
+    }
     public Player getWinner() {
         if (winner == 0) {
             throw new IllegalStateException("No winner yet.");
