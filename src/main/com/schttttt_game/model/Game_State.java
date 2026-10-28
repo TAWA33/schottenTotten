@@ -12,6 +12,9 @@ public class Game_State {
     private boolean gameOver;
     private int winner; // 1 or 2, 0 if no winner at the moment
 
+    private int tacticsPlayedByP1 = 0;
+    private int tacticsPlayedByP2 = 0;
+
     public Game_State() {
         players = new ArrayList<>();
         limits = new ArrayList<>();
@@ -72,6 +75,25 @@ public class Game_State {
     }
     public Deck getDeck() { // For class test compatibility
         return clanDeck;
+    }
+
+    public int getTacticsPlayed(int player) {
+        return player == 1 ? tacticsPlayedByP1 : tacticsPlayedByP2;
+    }
+
+    public void incrementTacticsPlayed(int player) {
+        if (player == 1){
+            tacticsPlayedByP1++;
+        }
+        else {
+            tacticsPlayedByP2++;
+        }
+    }
+
+    public boolean canPlayTactic(int player) {
+        int mine = getTacticsPlayed(player);
+        int opp = getTacticsPlayed(3 - player);
+        return mine <= opp;
     }
     public void updateClaims() {
         for (int player = 1; player <= 2; player++) {

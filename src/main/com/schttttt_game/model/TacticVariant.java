@@ -13,7 +13,18 @@ public class TacticVariant implements GameVariant{
 
     @Override
     public Deck createTacticDeck() {
-        return new Deck(false);
+        Deck d = new Deck(false);
+        d.addCard(new TacticCard(TacticType.JOKER));
+        d.addCard(new TacticCard(TacticType.JOKER));
+        d.addCard(new TacticCard(TacticType.SPY));
+        d.addCard(new TacticCard(TacticType.SHIELD_BEARER));
+        d.addCard(new TacticCard(TacticType.BLIND_MAN_BLUFF));
+        d.addCard(new TacticCard(TacticType.MUD_FIGHT));
+        d.addCard(new TacticCard(TacticType.RECRUITER));
+        d.addCard(new TacticCard(TacticType.STRATEGIST));
+        d.addCard(new TacticCard(TacticType.BANSHEE));
+        d.addCard(new TacticCard(TacticType.TRAITOR));
+        return d;
     }
 
     @Override

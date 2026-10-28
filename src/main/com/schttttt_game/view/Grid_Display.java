@@ -14,6 +14,7 @@ public class Grid_Display {
     private static final String PURPLE = "\u001B[1;95m";
     private static final String YELLOW = "\u001B[1;93m";
     private static final String GREY   = "\u001B[1;97m";
+    private static final String TACTIC = "\u001B[1;96m";
 
     private static final int CELL_W  = 8;
     private static final int LABEL_W = 14;
@@ -37,6 +38,13 @@ public class Grid_Display {
         List<Limit> limits = state.getLimits();
         int n = limits.size();
 
+        int maxCap = 3;
+        for (Limit l : limits) {
+            if (l.getCapacity() > maxCap){
+                maxCap = l.getCapacity();
+            }
+        }
+
         System.out.println();
         System.out.println();
         System.out.println();
@@ -51,13 +59,17 @@ public class Grid_Display {
         System.out.println();
 
         // Cards of the player at the top
-        for (int row = 2; row >= 0; row--) {
-            String label = (row == 2) ? truncate(topP.getName(), LABEL_W) : "";
+        for (int row = maxCap - 1; row >= 0; row--) {
+            String label = (row == maxCap - 1) ? truncate(topP.getName(), LABEL_W) : "";
             System.out.print(pad(label, LABEL_W));
             for (Limit l : limits) {
-                Card_Combinaison zone = l.getZone(topPlayerNum);
-                Card c = (row < zone.getNbCards()) ? zone.getCard(row) : null;
-                System.out.print(cell(c));
+                if (row >= l.getCapacity()) {
+                    System.out.print(" ".repeat(CELL_W));  // slot inexistant → blanc
+                } else {
+                    Card_Combinaison zone = l.getZone(topPlayerNum);
+                    Card c = (row < zone.getNbCards()) ? zone.getCard(row) : null;
+                    System.out.print(cell(c));
+                }
             }
             System.out.println();
         }
@@ -70,8 +82,16 @@ public class Grid_Display {
         System.out.println();
 
         System.out.print(pad("", LABEL_W));
-        for (int i = 0; i < n; i++) {
-            System.out.print(center("===", CELL_W));
+        for (Limit l : limits) {
+            if (l.getCombatModeCard() != null) {
+                String tag = l.getCombatModeCard().getShortName(); // "BL" or "MU"
+                String visible = " " + tag + " ";                  // " BL " or " MU "
+                int left  = (CELL_W - visible.length()) / 2;
+                int right = CELL_W - visible.length() - left;
+                System.out.print(" ".repeat(left) + TACTIC + visible + RESET + " ".repeat(right));
+            } else {
+                System.out.print(center("===", CELL_W));
+            }
         }
         System.out.println();
 
@@ -83,13 +103,17 @@ public class Grid_Display {
         System.out.println();
 
         // Bottom player cards
-        for (int row = 0; row < 3; row++) {
+        for (int row = 0; row < maxCap; row++) {
             String label = (row == 0) ? truncate(bottomP.getName(), LABEL_W) : "";
             System.out.print(pad(label, LABEL_W));
             for (Limit l : limits) {
-                Card_Combinaison zone = l.getZone(bottomPlayerNum);
-                Card c = (row < zone.getNbCards()) ? zone.getCard(row) : null;
-                System.out.print(cell(c));
+                if (row >= l.getCapacity()) {
+                    System.out.print(" ".repeat(CELL_W));
+                } else {
+                    Card_Combinaison zone = l.getZone(bottomPlayerNum);
+                    Card c = (row < zone.getNbCards()) ? zone.getCard(row) : null;
+                    System.out.print(cell(c));
+                }
             }
             System.out.println();
         }
@@ -107,9 +131,9 @@ public class Grid_Display {
         } else {
             for (int i = 0; i < p.getHand().getNbCards(); i++) {
                 Card c = p.getHand().getCard(i);
-                sb.append("[").append(i+1).append("] ")
-                  .append(colorize(shortColor(c.getColor()) + c.getValue(), c.getColor()))
-                  .append("  ");
+                sb.append("[").append(i + 1).append("] ")
+                .append(colorizeCard(c, displayOf(c)))
+                .append("  ");
             }
         }
         System.out.println(sb);
@@ -123,14 +147,26 @@ public class Grid_Display {
             + colorize("P", "Purple") + "=Purple  "
             + colorize("Y", "Yellow") + "=Yellow  "
             + colorize("E", "Grey")   + "=Grey");
+    
+        // Put an IF only if it's Tactic Variant Game
+        System.out.println("Tactic legend : "
+            + TACTIC + "J?" + RESET + "=Joker  "
+            + TACTIC + "S7" + RESET + "=Spy  "
+            + TACTIC + "B?" + RESET + "=ShieldBearer  "
+            + TACTIC + "BL" + RESET + "=BlindManBluff  "
+            + TACTIC + "MU" + RESET + "=MudFight  "
+            + TACTIC + "RE" + RESET + "=Recruiter  "
+            + TACTIC + "ST" + RESET + "=Strategist  "
+            + TACTIC + "BA" + RESET + "=Banshee  "
+            + TACTIC + "TR" + RESET + "=Traitor");
     }
 
     private static String cell(Card c) {
         if (c == null){
             return "  [  ]  ";
         }
-        String visible = "[" + shortColor(c.getColor()) + c.getValue() + "]";
-        return "  " + colorize(visible, c.getColor()) + "  ";
+        String visible = "[" + displayOf(c) + "]";
+        return "  " + colorizeCard(c, visible) + "  ";
     }
 
     private static String shortColor(String color) {
@@ -157,6 +193,20 @@ public class Grid_Display {
             default:       code = RESET;  break;
         }
         return code + s + RESET;
+    }
+
+    private static String displayOf(Card c) {
+        if (c instanceof TacticCard) {
+            return ((TacticCard) c).getShortName();
+        }
+        return shortColor(c.getColor()) + c.getValue();
+    }
+
+    private static String colorizeCard(Card c, String text) {
+        if (c instanceof TacticCard) {
+            return TACTIC + text + RESET;
+        }
+        return colorize(text, c.getColor());
     }
 
     private static String pad(String s, int w) {

@@ -16,7 +16,7 @@ public class Deck {
         if (fill) {
             for (String color : Card.COLORS) {
                 for (int value = 1; value <= 9; value++) {
-                    cards.add(new Card(value, color));
+                    cards.add(new ClanCard(value, color));
                 }
             }
         }

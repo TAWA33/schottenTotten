@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import main.com.schttttt_game.model.Card;
 import main.com.schttttt_game.model.Card_Combinaison;
+import main.com.schttttt_game.model.ClanCard;
 
 public class Card_CombinaisonTest {
 
@@ -22,16 +23,16 @@ public class Card_CombinaisonTest {
     @Test
     public void testListConstructorCopiesList() {
         List<Card> src = new ArrayList<>();
-        src.add(new Card(1, "Blue"));
+        src.add(new ClanCard(1, "Blue"));
         Card_Combinaison cc = new Card_Combinaison(src);
-        src.add(new Card(2, "Red")); // ne doit pas affecter cc
+        src.add(new ClanCard(2, "Red")); // ne doit pas affecter cc
         assertEquals(1, cc.getNbCards());
     }
 
     @Test
     public void testAddCard() {
         Card_Combinaison cc = new Card_Combinaison();
-        Card c = new Card(3, "Blue");
+        Card c = new ClanCard(3, "Blue");
         cc.addCard(c);
         assertEquals(1, cc.getNbCards());
         assertSame(c, cc.getCard(0));
@@ -45,7 +46,7 @@ public class Card_CombinaisonTest {
     @Test
     public void testRemoveCard() {
         Card_Combinaison cc = new Card_Combinaison();
-        Card c = new Card(3, "Blue");
+        Card c = new ClanCard(3, "Blue");
         cc.addCard(c);
         cc.removeCard(c);
         assertTrue(cc.isEmpty());
@@ -59,7 +60,7 @@ public class Card_CombinaisonTest {
     @Test
     public void testGetCardsReturnsDefensiveCopy() {
         Card_Combinaison cc = new Card_Combinaison();
-        cc.addCard(new Card(1, "Blue"));
+        cc.addCard(new ClanCard(1, "Blue"));
         List<Card> copy = cc.getCards();
         copy.clear();
         assertEquals(1, cc.getNbCards());
@@ -68,9 +69,9 @@ public class Card_CombinaisonTest {
     @Test
     public void testGetCombinaisonIsImmutable() {
         Card_Combinaison cc = new Card_Combinaison();
-        cc.addCard(new Card(1, "Blue"));
+        cc.addCard(new ClanCard(1, "Blue"));
         try {
-            cc.getCombinaison().add(new Card(2, "Red"));
+            cc.getCombinaison().add(new ClanCard(2, "Red"));
             fail("Should be unmodifiable");
         } catch (UnsupportedOperationException e) {
             // expected
@@ -80,8 +81,8 @@ public class Card_CombinaisonTest {
     @Test
     public void testClear() {
         Card_Combinaison cc = new Card_Combinaison();
-        cc.addCard(new Card(1, "Blue"));
-        cc.addCard(new Card(2, "Red"));
+        cc.addCard(new ClanCard(1, "Blue"));
+        cc.addCard(new ClanCard(2, "Red"));
         cc.clear();
         assertTrue(cc.isEmpty());
     }
@@ -94,8 +95,8 @@ public class Card_CombinaisonTest {
     @Test
     public void testToStringWithCards() {
         Card_Combinaison cc = new Card_Combinaison();
-        cc.addCard(new Card(1, "Blue"));
-        cc.addCard(new Card(2, "Red"));
+        cc.addCard(new ClanCard(1, "Blue"));
+        cc.addCard(new ClanCard(2, "Red"));
         String s = cc.toString();
         assertTrue(s.contains("Blue 1"));
         assertTrue(s.contains("Red 2"));

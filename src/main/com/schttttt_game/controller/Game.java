@@ -165,23 +165,61 @@ public class Game {
 
     private int playMove(Player player, int cardIndex, int limitIndex) {
         Card card = player.removeCardFromHand(cardIndex);
-        int playerIndex = state.getPlayers().indexOf(player) + 1; // 1 or 2
+        int playerIndex = state.getPlayers().indexOf(player) + 1;
         Limit limit = state.getLimits().get(limitIndex);
+
         if (limit.getControl() != 0) {
             System.out.println("This limit is already claimed !");
             player.addCardToHand(card);
             return 0;
         }
+
+        // Combat Mode (MU / BL)
+        if (card instanceof TacticCard) {
+            TacticCard tc = (TacticCard) card;
+            if (tc.getType() == TacticType.MUD_FIGHT || tc.getType() == TacticType.BLIND_MAN_BLUFF) {
+                if (limit.getCombatModeCard() != null) {
+                    System.out.println("This limit already has a combat mode card !");
+                    player.addCardToHand(card);
+                    return 0;
+                }
+                if (!state.canPlayTactic(playerIndex)) {
+                    System.out.println("You cannot play another Tactic Card.");
+                    player.addCardToHand(card);
+                    return 0;
+                }
+                limit.setCombatModeCard(tc);
+                state.incrementTacticsPlayed(playerIndex);
+                drawAfterPlay(player);
+                System.out.println(player.getName() + " plays " + tc + " on limit " + (limitIndex + 1) + " (combat mode)");
+                state.updateClaims();
+                return 1;
+            }
+
+            // (Joker, Spy, ShieldBearer, ruses)
+            if (tc.isRuse()) {
+                System.out.println("Ruse cards are not implemented yet.");
+                player.addCardToHand(card);
+                return 0;
+            }
+            if (!state.canPlayTactic(playerIndex)) {
+                System.out.println("You cannot play another Tactic Card.");
+                player.addCardToHand(card);
+                return 0;
+            }
+            state.incrementTacticsPlayed(playerIndex);
+        }
+
+        // Clan Card
         if (limit.isFull(playerIndex)) {
             System.out.println("This zone is full !");
-            player.addCardToHand(card); // put the card back
-            return 0; // Player have to play again
+            player.addCardToHand(card);
+            return 0;
         }
         limit.addCard(playerIndex, card);
         limit.evaluate();
 
-        drawAfterPlay(player); // Method to choose in which Deck draw a Card
-
+        drawAfterPlay(player);
         System.out.println(player.getName() + " plays " + card + " on limit " + (limitIndex + 1));
         state.updateClaims();
         return 1;

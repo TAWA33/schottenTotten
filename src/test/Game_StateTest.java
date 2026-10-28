@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import main.com.schttttt_game.model.Card;
+import main.com.schttttt_game.model.ClanCard;
 import main.com.schttttt_game.model.Deck;
 import main.com.schttttt_game.model.Game_State;
 import main.com.schttttt_game.model.Limit;
@@ -95,9 +95,9 @@ public class Game_StateTest {
     public void testGetValidLimitsExcludesFullZone() {
         Game_State s = newStateWithLimits(2);
         Limit l0 = s.getLimits().get(0);
-        l0.addCard(1, new Card(1, "Blue"));
-        l0.addCard(1, new Card(2, "Blue"));
-        l0.addCard(1, new Card(3, "Blue"));
+        l0.addCard(1, new ClanCard(1, "Blue"));
+        l0.addCard(1, new ClanCard(2, "Blue"));
+        l0.addCard(1, new ClanCard(3, "Blue"));
 
         List<Integer> forP1 = s.getValidLimits(1);
         assertEquals(1, forP1.size());
@@ -126,9 +126,9 @@ public class Game_StateTest {
         Game_State s = newStateWithLimits(2);
         s.getLimits().get(0).setControl(1);
         Limit l1 = s.getLimits().get(1);
-        l1.addCard(1, new Card(1, "Blue"));
-        l1.addCard(1, new Card(2, "Blue"));
-        l1.addCard(1, new Card(3, "Blue"));
+        l1.addCard(1, new ClanCard(1, "Blue"));
+        l1.addCard(1, new ClanCard(2, "Blue"));
+        l1.addCard(1, new ClanCard(3, "Blue"));
 
         assertTrue(s.getValidLimits(1).isEmpty());
         assertEquals(1, s.getValidLimits(2).size());
