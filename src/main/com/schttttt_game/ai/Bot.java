@@ -9,9 +9,15 @@ import main.com.schttttt_game.model.*;
 public class Bot extends Player {
     private Random random = new Random();
 
-    public Bot(String name) {
-        super(name, true); // true = AI
+    public Bot(String name, int maxHandSize) {
+        super(name, true, maxHandSize); // true = AI
     }
+
+    public Bot(String name) { // Only for tests !
+        super(name, true, 6);
+    }
+
+
 
     public int[] makeRandomMove(Game_State state) {
         // return {indexCarte, indexBorne}

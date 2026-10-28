@@ -5,6 +5,16 @@ import java.util.Scanner;
 public class Menu {
     public static int showMenu(Scanner scanner) {
         System.out.println("=== WELCOME ON SCHOTTEN TOTTEN ===");
+        System.out.println("1. Classic Game");
+        System.out.println("2. Tactic Game");
+        System.out.print("Choice: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        return choice;
+    }
+
+    public static int showPlayerMode(Scanner scanner){
+        System.out.println("--- Game Mode ---");
         System.out.println("1. Player vs Player");
         System.out.println("2. Player vs AI");
         System.out.print("Choice: ");

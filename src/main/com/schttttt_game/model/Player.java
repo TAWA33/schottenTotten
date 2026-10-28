@@ -4,11 +4,17 @@ public class Player {
     private String name;
     private Card_Combinaison hand;
     private boolean isAI;
+    private int maxHandSize;
 
-    public Player(String name, boolean isAI) {
+    public Player(String name, boolean isAI, int maxHandSize) {
         this.name = name;
         this.hand = new Card_Combinaison();
         this.isAI = isAI;
+        this.maxHandSize = maxHandSize;
+    }
+
+    public Player(String name, boolean isAI) { // Another constructor for GameTest 
+        this(name, isAI, 6);
     }
 
     public String getName() {
@@ -22,8 +28,8 @@ public class Player {
     }
 
     public void addCardToHand(Card card) {
-        if (hand.getNbCards() >= 6) {
-            throw new IllegalStateException("Hand is full (max 6 cards)");
+        if (hand.getNbCards() >= maxHandSize) {
+            throw new IllegalStateException("Hand is full (max " + maxHandSize + " cards)");
         }
         hand.addCard(card);
     }

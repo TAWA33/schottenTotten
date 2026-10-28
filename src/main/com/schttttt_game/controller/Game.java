@@ -17,23 +17,26 @@ public class Game {
 
     public void start() {
         System.out.println("Welcome on Schotten Totten !");
-        int choice = Menu.showMenu(scanner);
+        int variant_choice = Menu.showMenu(scanner);
+        GameVariant variant = GameFactory.createVariant(variant_choice);
+
+        int mode_choice = Menu.showPlayerMode(scanner);
 
         String p1Name = askPlayerName("Player 1");
-        Player p1 = new Player(p1Name, false);
+        Player p1 = new Player(p1Name, false, variant.getHandSize());
 
         Player p2;
-        if (choice == 2) {
-            p2 = new Bot("AI");
+        if (mode_choice == 2) {
+            p2 = new Bot("AI", variant.getHandSize());
         } else {
             String p2Name = askPlayerName("Player 2");
-            p2 = new Player(p2Name, false);
+            p2 = new Player(p2Name, false, variant.getHandSize());
         }
         state.addPlayer(p1);
         state.addPlayer(p2);
 
         // Deck init
-        Deck deck = new Deck();
+        Deck deck = variant.createDeck();
         deck.shuffle();
         state.setDeck(deck);
 
@@ -43,7 +46,8 @@ public class Game {
         }
 
         // Fill the hand of each player
-        for (int i = 0; i < 6; i++) {
+        int handSize = variant.getHandSize();
+        for (int i = 0; i < handSize; i++) {
             p1.addCardToHand(deck.drawCard());
             p2.addCardToHand(deck.drawCard());
         }
@@ -68,7 +72,7 @@ public class Game {
                 Grid_Display.displayHand(current);
                 Grid_Display.displayLegend();
 
-                System.out.print("Enter the number of the card (1-6) or 'q' to quit: ");
+                System.out.print("Enter the number of the card (1-" + current.getHand().getNbCards() +") or 'q' to quit: ");
                 String input = scanner.nextLine();
                 if (input.equalsIgnoreCase("q")) {
                     System.out.println("Thank you for playing !");
