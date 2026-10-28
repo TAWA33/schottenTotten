@@ -17,7 +17,17 @@ public class Bot extends Player {
         super(name, true, 6);
     }
 
-
+    public Deck chooseDeck(Game_State state) {
+        Deck clan = state.getClanDeck();
+        Deck tactic = state.getTacticDeck();
+        if (tactic == null || tactic.isEmpty()){
+            return clan;
+        }
+        if (clan == null || clan.isEmpty()){
+            return tactic;
+        }
+        return random.nextBoolean() ? clan : tactic;
+    }
 
     public int[] makeRandomMove(Game_State state) {
         // return {indexCarte, indexBorne}

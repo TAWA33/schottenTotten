@@ -6,7 +6,8 @@ import java.util.List;
 public class Game_State {
     private List<Player> players;
     private List<Limit> limits;
-    private Deck deck;
+    private Deck clanDeck;
+    private Deck tacticDeck;
     private int currentPlayerIndex; // 0 or 1
     private boolean gameOver;
     private int winner; // 1 or 2, 0 if no winner at the moment
@@ -51,15 +52,30 @@ public class Game_State {
     public void addLimit(Limit l) {
         limits.add(l);
     }
-    public Deck getDeck() {
-        return deck;
+    public Deck getClanDeck() {
+        return clanDeck;
+    }
+    public Deck getTacticDeck() {
+        return tacticDeck;
+    }
+    public void setClanDeck(Deck deck){
+        this.clanDeck = deck;
+    }
+    public void setTacticDeck(Deck deck){
+        this.tacticDeck = deck;
+    }
+    public boolean hasTacticDeck() {
+        return tacticDeck != null && !tacticDeck.isEmpty();
     }
     public void setDeck(Deck deck) {
-        this.deck = deck;
+        this.clanDeck = deck;
+    }
+    public Deck getDeck() { // For class test compatibility
+        return clanDeck;
     }
     public void updateClaims() {
         for (int player = 1; player <= 2; player++) {
-            List<Card> unknown = deck.getCards(); // Deck
+            List<Card> unknown = clanDeck.getCards(); // ClanDeck. We ommit now the Tactic cards that can change the claim (Joker, Shield, 7).
             unknown.addAll(players.get(2 - player).getHand().getCards()); // Opponent Hand
             unknown.addAll(players.get(currentPlayerIndex).getHand().getCards());
             for (Limit l : limits) {

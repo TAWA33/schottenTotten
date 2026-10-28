@@ -7,9 +7,13 @@ public class TacticVariant implements GameVariant{
     }
 
     @Override
-    public Deck createDeck() {
-        // We have to create the tectic card deck. Return an array or list of the 2 decks
+    public Deck createClanDeck() {
         return new Deck();
+    }
+
+    @Override
+    public Deck createTacticDeck() {
+        return new Deck(false);
     }
 
     @Override

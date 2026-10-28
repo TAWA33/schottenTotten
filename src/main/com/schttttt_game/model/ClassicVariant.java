@@ -7,8 +7,13 @@ public class ClassicVariant implements GameVariant{
     }
 
     @Override
-    public Deck createDeck(){
+    public Deck createClanDeck(){
         return new Deck();
+    }
+
+    @Override
+    public Deck createTacticDeck() {
+        return new Deck(false);
     }
 
     @Override

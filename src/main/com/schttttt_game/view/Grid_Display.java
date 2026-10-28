@@ -96,6 +96,8 @@ public class Grid_Display {
 
         System.out.println("=================================================");
         System.out.println();
+        System.out.println("Clan deck: " + state.getClanDeck().size() + (state.hasTacticDeck() ? " | Tactic deck: " + state.getTacticDeck().size() : ""));
+        System.out.println();
     }
 
     public static void displayHand(Player p) {

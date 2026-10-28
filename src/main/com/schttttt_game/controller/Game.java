@@ -36,9 +36,14 @@ public class Game {
         state.addPlayer(p2);
 
         // Deck init
-        Deck deck = variant.createDeck();
-        deck.shuffle();
-        state.setDeck(deck);
+        Deck clanDeck = variant.createClanDeck();
+        Deck tacticDeck = variant.createTacticDeck();
+        clanDeck.shuffle();
+        if (!tacticDeck.isEmpty()){
+            tacticDeck.shuffle();
+        }
+        state.setClanDeck(clanDeck);
+        state.setTacticDeck(tacticDeck);
 
         // Init of the 9 limits
         for (int i = 0; i < 9; i++) {
@@ -48,8 +53,8 @@ public class Game {
         // Fill the hand of each player
         int handSize = variant.getHandSize();
         for (int i = 0; i < handSize; i++) {
-            p1.addCardToHand(deck.drawCard());
-            p2.addCardToHand(deck.drawCard());
+            p1.addCardToHand(clanDeck.drawCard());
+            p2.addCardToHand(clanDeck.drawCard());
         }
 
         // Game loop
@@ -126,6 +131,38 @@ public class Game {
         return name;
     }
 
+    private void drawAfterPlay(Player player) {
+        Deck clan = state.getClanDeck();
+        Deck tactic = state.getTacticDeck();
+        boolean clanEmpty = clan == null || clan.isEmpty();
+        boolean tacticEmpty = tactic == null || tactic.isEmpty();
+
+        if (clanEmpty && tacticEmpty) {
+            System.out.println("Both decks are empty, no draw.");
+            return;
+        }
+
+        Deck chosen;
+        if (clanEmpty) {
+            chosen = tactic;
+        } else if (tacticEmpty) {
+            chosen = clan;
+        } else if (player.isAI()) {
+            chosen = ((Bot) player).chooseDeck(state);
+        } else {
+            System.out.println("Clan deck: " + clan.size() + " cards | Tactic deck: " + tactic.size() + " cards");
+            System.out.print("Draw from (1 = Clan, 2 = Tactic): ");
+            try {
+                int c = Integer.parseInt(scanner.nextLine());
+                chosen = (c == 2) ? tactic : clan;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid entry, drawing from Clan deck.");
+                chosen = clan;
+            }
+        }
+        player.addCardToHand(chosen.drawCard());
+    }
+
     private int playMove(Player player, int cardIndex, int limitIndex) {
         Card card = player.removeCardFromHand(cardIndex);
         int playerIndex = state.getPlayers().indexOf(player) + 1; // 1 or 2
@@ -143,11 +180,8 @@ public class Game {
         limit.addCard(playerIndex, card);
         limit.evaluate();
 
-        if (!state.getDeck().isEmpty()) {
-            player.addCardToHand(state.getDeck().drawCard());
-        } else {
-            System.out.println("Empty Deck.");
-        }
+        drawAfterPlay(player); // Method to choose in which Deck draw a Card
+
         System.out.println(player.getName() + " plays " + card + " on limit " + (limitIndex + 1));
         state.updateClaims();
         return 1;

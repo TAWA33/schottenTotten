@@ -8,12 +8,22 @@ public class Deck {
     private final List<Card> cards;
 
     public Deck() {
+        this(true);
+    }
+
+    public Deck(boolean fill) {
         this.cards = new ArrayList<>();
-        for (String color : Card.COLORS) {
-            for (int value = 1; value <= 9; value++) {
-                cards.add(new Card(value, color));
+        if (fill) {
+            for (String color : Card.COLORS) {
+                for (int value = 1; value <= 9; value++) {
+                    cards.add(new Card(value, color));
+                }
             }
         }
+    }
+
+    public void addCard(Card card) {
+        cards.add(card);
     }
 
     public List<Card> getCards() {
