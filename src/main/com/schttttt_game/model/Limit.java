@@ -147,32 +147,55 @@ public class Limit {
     }
 
     private static int evaluateStatic(List<Card> cards, boolean useCombinations) {
-        // capacity=4 (MU) or useCombinations=false (BL) -> SUM
-        if (cards.size() != 3 || !useCombinations) {
+        // BL only SUM
+        if (!useCombinations) {
             int sum = 0;
-            for (Card c : cards){
-                sum += c.getValue();
-            }
+            for (Card c : cards) sum += c.getValue();
             return sum;
         }
         List<Card> sorted = new ArrayList<>(cards);
-        sorted.sort((c1, c2) -> Integer.compare(c1.getValue(), c2.getValue()));
+        sorted.sort((a, b) -> Integer.compare(a.getValue(), b.getValue()));
+
+        int sum = 0;
+        for (Card c : sorted) sum += c.getValue();
+
+        for (Card c : sorted) { // Verification
+            if (c.getColor() == null) return sum;
+        }
+
+        int size = sorted.size();
         int v1 = sorted.get(0).getValue();
-        int v2 = sorted.get(1).getValue();
-        int v3 = sorted.get(2).getValue();
         String c1 = sorted.get(0).getColor();
-        String c2 = sorted.get(1).getColor();
-        String c3 = sorted.get(2).getColor();
-        // Garde-fou : si une carte tactique a une couleur null (ruse mal posée), on additionne
-        if (c1 == null || c2 == null || c3 == null) return v1 + v2 + v3;
-        boolean sameColor   = c1.equals(c2) && c2.equals(c3);
-        boolean consecutive = (v2 == v1 + 1) && (v3 == v2 + 1);
-        boolean threeOfAKind = (v1 == v2) && (v2 == v3);
-        if (sameColor && consecutive) return 5000 + v1 + v2 + v3;
-        if (threeOfAKind) return 4000 + v1 * 3;
-        if (sameColor) return 3000 + v1 + v2 + v3;
-        if (consecutive) return 2000 + v1 + v2 + v3;
-        return 1000 + v1 + v2 + v3;
+
+        boolean sameColor = true;
+        for (Card c : sorted) {
+            if (!c.getColor().equals(c1)) {
+                sameColor = false;
+                break;
+            }
+        }
+
+        boolean consecutive = true; // consecutive : v[i] == v[i-1] + 1 for all i
+        for (int i = 1; i < size; i++) {
+            if (sorted.get(i).getValue() != sorted.get(i - 1).getValue() + 1) {
+                consecutive = false;
+                break;
+            }
+        }
+
+        boolean allSameValue = true;
+        for (Card c : sorted) {
+            if (c.getValue() != v1) {
+                allSameValue = false;
+                break;
+            }
+        }
+
+        if (sameColor && consecutive) return 5000 + sum;
+        if (allSameValue) return 4000 + v1 * size;   // v1*3 or v1*4
+        if (sameColor) return 3000 + sum;
+        if (consecutive) return 2000 + sum;
+        return 1000 + sum;
     }
 
     public boolean canClaim(int player, List<Card> unknown) {
