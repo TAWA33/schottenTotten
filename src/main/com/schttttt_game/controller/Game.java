@@ -1,5 +1,7 @@
 package main.com.schttttt_game.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import main.com.schttttt_game.ai.Bot;
@@ -78,7 +80,7 @@ public class Game {
                 Grid_Display.displayLegend();
 
                 System.out.print("Enter the number of the card (1-" + current.getHand().getNbCards() +") or 'q' to quit: ");
-                String input = scanner.nextLine();
+                String input = scanner.nextLine().trim();
                 if (input.equalsIgnoreCase("q")) {
                     System.out.println("Thank you for playing !");
                     return;
@@ -97,7 +99,7 @@ public class Game {
                 System.out.print("Enter the number of the limit (1-9): ");
                 int limitIndex;
                 try {
-                    limitIndex = Integer.parseInt(scanner.nextLine()) - 1;
+                    limitIndex = Integer.parseInt(scanner.nextLine().trim()) - 1;
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid entry.");
                     continue;
@@ -131,6 +133,22 @@ public class Game {
         return name;
     }
 
+    private int askChoice(Player player, String prompt, List<Integer> validChoices) {
+        if (validChoices.isEmpty()) return -1;
+        if (player.isAI()) {
+            return validChoices.get(new java.util.Random().nextInt(validChoices.size()));
+        }
+        System.out.print(prompt + " " + validChoices + ": ");
+        try {
+            int input = Integer.parseInt(scanner.nextLine().trim());
+            if (validChoices.contains(input)) {
+                return input;
+            }
+        } catch (NumberFormatException e) {}
+        System.out.println("Invalid choice, using " + validChoices.get(0));
+        return validChoices.get(0);
+    }
+
     private void drawAfterPlay(Player player) {
         Deck clan = state.getClanDeck();
         Deck tactic = state.getTacticDeck();
@@ -153,7 +171,7 @@ public class Game {
             System.out.println("Clan deck: " + clan.size() + " cards | Tactic deck: " + tactic.size() + " cards");
             System.out.print("Draw from (1 = Clan, 2 = Tactic): ");
             try {
-                int c = Integer.parseInt(scanner.nextLine());
+                int c = Integer.parseInt(scanner.nextLine().trim());
                 chosen = (c == 2) ? tactic : clan;
             } catch (NumberFormatException e) {
                 System.out.println("Invalid entry, drawing from Clan deck.");
@@ -174,17 +192,16 @@ public class Game {
             return 0;
         }
 
-        // Combat Mode (MU / BL)
         if (card instanceof TacticCard) {
+            if (!state.canPlayTactic(playerIndex)) {
+                System.out.println("You cannot play another Tactic Card.");
+                player.addCardToHand(card);
+                return 0;
+            }
             TacticCard tc = (TacticCard) card;
             if (tc.getType() == TacticType.MUD_FIGHT || tc.getType() == TacticType.BLIND_MAN_BLUFF) {
                 if (limit.getCombatModeCard() != null) {
                     System.out.println("This limit already has a combat mode card !");
-                    player.addCardToHand(card);
-                    return 0;
-                }
-                if (!state.canPlayTactic(playerIndex)) {
-                    System.out.println("You cannot play another Tactic Card.");
                     player.addCardToHand(card);
                     return 0;
                 }
@@ -196,8 +213,97 @@ public class Game {
                 return 1;
             }
 
-            // (Joker, Spy, ShieldBearer, ruses)
             if (tc.isRuse()) {
+                int opp = 3 - playerIndex;
+    
+                if (tc.getType() == TacticType.BANSHEE) {
+                    // Find uncontrolled limits where opp add min 1 card.
+                    List<Integer> validLimits = new ArrayList<>();
+                    for (int i = 0; i < state.getLimits().size(); i++) {
+                        Limit l = state.getLimits().get(i);
+                        if (l.getControl() == 0 && l.getZone(opp).getNbCards() > 0) {
+                            validLimits.add(i + 1); // Indexation between 1-9.
+                        }
+                    }
+                    
+                    if (validLimits.isEmpty()) {
+                        System.out.println("No valid target for Banshee.");
+                        player.addCardToHand(card);
+                        return 0;
+                    }
+                    
+                    int targetLimitIdx = askChoice(player, "Choose limit to Banshee:", validLimits);
+                    Limit targetLimit = state.getLimits().get(targetLimitIdx - 1); // return to indexation 0-8
+
+                    List<Integer> validCards = new ArrayList<>();
+                    for (int i = 0; i < targetLimit.getZone(opp).getNbCards(); i++) {
+                        validCards.add(i + 1);
+                    }
+                    int cardIdx = askChoice(player, "Choose opponent card to discard:", validCards);
+                    
+                    Card discarded = targetLimit.getZone(opp).getCard(cardIdx - 1);
+                    targetLimit.getZone(opp).removeCard(discarded);
+                    System.out.println(player.getName() + " plays Banshee: discards " + discarded + " from limit " + (targetLimitIdx));
+                    
+                    state.incrementTacticsPlayed(playerIndex);
+                    targetLimit.evaluate();
+                    drawAfterPlay(player);
+                    state.updateClaims();
+                    return 1;
+                }
+                if (tc.getType() == TacticType.STRATEGIST) {
+                    List<Integer> sourceLimits = new ArrayList<>();
+                    for (int i = 0; i < state.getLimits().size(); i++) {
+                        Limit l = state.getLimits().get(i);
+                        if (l.getControl() == 0 && l.getZone(playerIndex).getNbCards() > 0) {
+                            sourceLimits.add(i + 1);
+                        }
+                    }
+                    if (sourceLimits.isEmpty()) {
+                        System.out.println("No valid source for Strategist.");
+                        player.addCardToHand(card);
+                        return 0;
+                    }
+                    
+                    int srcIdx = askChoice(player, "Choose source limit for Strategist:", sourceLimits);
+                    Limit srcLimit = state.getLimits().get(srcIdx - 1);
+
+                    List<Integer> cardChoices = new ArrayList<>();
+                    for (int i = 0; i < srcLimit.getZone(playerIndex).getNbCards(); i++) {
+                        cardChoices.add(i + 1);
+                    }
+                    int cardNum = askChoice(player, "Choose your card to move:", cardChoices);
+                    Card movedCard = srcLimit.getZone(playerIndex).getCard(cardNum - 1);
+
+                    // finding dest liit (non controlled, non full different from source)
+                    List<Integer> destLimits = new ArrayList<>();
+                    for (int i = 0; i < state.getLimits().size(); i++) {
+                        Limit l = state.getLimits().get(i);
+                        if (l.getControl() == 0 && !l.isFull(playerIndex) && (i + 1) != srcIdx) {
+                            destLimits.add(i + 1);
+                        }
+                    }
+                    // To destroy a card.
+                    destLimits.add(0); 
+
+                    int destIdx = askChoice(player, "Choose destination limit (0 to discard):", destLimits);
+
+                    srcLimit.getZone(playerIndex).removeCard(movedCard);
+                    if (destIdx != 0) {
+                        Limit destLimit = state.getLimits().get(destIdx - 1);
+                        destLimit.getZone(playerIndex).addCard(movedCard);
+                        destLimit.evaluate();
+                        System.out.println(player.getName() + " moves " + movedCard + " from L" + srcIdx + " to L" + destIdx);
+                    } else {
+                        System.out.println(player.getName() + " discards " + movedCard + " with Strategist.");
+                    }
+                    
+                    srcLimit.evaluate();
+                    state.incrementTacticsPlayed(playerIndex);
+                    drawAfterPlay(player);
+                    state.updateClaims();
+                    return 1;
+                }
                 System.out.println("Ruse cards are not implemented yet.");
                 player.addCardToHand(card);
                 return 0;
