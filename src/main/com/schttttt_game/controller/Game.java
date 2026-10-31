@@ -318,6 +318,63 @@ public class Game {
                     state.updateClaims();
                     return 1;
                 }
+                if (tc.getType() == TacticType.TRAITOR) {
+                    List<Integer> sourceLimits = new ArrayList<>();
+                    for (int i = 0; i < state.getLimits().size(); i++) {
+                        Limit l = state.getLimits().get(i);
+                        if (l.getControl() == 0) {
+                            for (Card c : l.getZone(opp).getCards()) {
+                                if (c instanceof ClanCard) { // Only Clan Card
+                                    sourceLimits.add(i + 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (sourceLimits.isEmpty()) {
+                        System.out.println("No valid source for Traitor.");
+                        player.addCardToHand(card);
+                        return 0;
+                    }
+                    
+                    int srcIdx = askChoice(player, "Choose opponent limit for Traitor:", sourceLimits);
+                    Limit srcLimit = state.getLimits().get(srcIdx - 1);
+
+                    List<Integer> validCards = new ArrayList<>();
+                    for (int i = 0; i < srcLimit.getZone(opp).getNbCards(); i++) {
+                        if (srcLimit.getZone(opp).getCard(i) instanceof ClanCard) {
+                            validCards.add(i + 1);
+                        }
+                    }
+                    int cardNum = askChoice(player, "Choose opponent ClanCard to steal:", validCards);
+                    Card stolenCard = srcLimit.getZone(opp).getCard(cardNum - 1);
+
+                    List<Integer> destLimits = new ArrayList<>();
+                    for (int i = 0; i < state.getLimits().size(); i++) {
+                        Limit l = state.getLimits().get(i);
+                        if (l.getControl() == 0 && !l.isFull(playerIndex)) {
+                            destLimits.add(i + 1);
+                        }
+                    }
+                    if (destLimits.isEmpty()) {
+                        System.out.println("No valid destination for Traitor.");
+                        player.addCardToHand(card);
+                        return 0;
+                    }
+                    int destIdx = askChoice(player, "Choose your destination limit for Traitor:", destLimits);
+                    Limit destLimit = state.getLimits().get(destIdx - 1);
+
+                    srcLimit.getZone(opp).removeCard(stolenCard);
+                    destLimit.getZone(playerIndex).addCard(stolenCard);
+                    System.out.println(player.getName() + " steals " + stolenCard + " from L" + srcIdx + " to L" + destIdx + " with Traitor.");
+                    
+                    srcLimit.evaluate();
+                    destLimit.evaluate();
+                    state.incrementTacticsPlayed(playerIndex);
+                    drawAfterPlay(player);
+                    state.updateClaims();
+                    return 1;
+                }
                 System.out.println("Ruse cards are not implemented yet.");
                 player.addCardToHand(card);
                 return 0;
