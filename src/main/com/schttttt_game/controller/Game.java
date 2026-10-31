@@ -375,6 +375,48 @@ public class Game {
                     state.updateClaims();
                     return 1;
                 }
+
+                if (tc.getType() == TacticType.RECRUITER) {
+                    Deck clanDeck = state.getClanDeck();
+                    
+                    if (clanDeck.size() < 3) {
+                        System.out.println("Not enough cards in clan deck for Recruiter.");
+                        player.addCardToHand(card);
+                        return 0;
+                    }
+                    List<Card> drawn = new ArrayList<>();
+                    for (int i = 0; i < 3; i++) {
+                        drawn.add(clanDeck.drawCard());
+                    }
+
+                    if (!player.isAI()) {
+                        System.out.print("Cards drawn by Recruiter:");
+                        for (int i = 0; i < drawn.size(); i++) {
+                            System.out.println("  " + (i + 1) + ": " + drawn.get(i));
+                        }
+                    }
+
+                    List<Integer> options = new ArrayList<>();
+                    options.add(1); 
+                    options.add(2);
+                    options.add(3);
+                    int keepIdx = askChoice(player, "Choose ONE card to keep:", options);
+                    Card keptCard = drawn.get(keepIdx - 1);
+                    
+                    player.addCardToHand(keptCard);
+                    
+                    for (int i = 0; i < drawn.size(); i++) {
+                        if (i != keepIdx - 1) {
+                            clanDeck.addCard(drawn.get(i)); // addCard add the card at the end of the deck
+                        }
+                    }
+                    
+                    System.out.println(player.getName() + " plays Recruiter: keeps " + keptCard + ".");
+                    
+                    state.incrementTacticsPlayed(playerIndex);
+                    state.updateClaims();
+                    return 1;
+                }
                 System.out.println("Ruse cards are not implemented yet.");
                 player.addCardToHand(card);
                 return 0;
