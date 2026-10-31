@@ -199,6 +199,20 @@ public class Game {
                 return 0;
             }
             TacticCard tc = (TacticCard) card;
+            if (tc.getType() == TacticType.JOKER) {
+                for (Limit l : state.getLimits()) {
+                    for (Card c : l.getZone(playerIndex).getCards()) {
+                        if (c instanceof TacticCard) {
+                            TacticCard tactic_card = (TacticCard) c;
+                            if (tactic_card.getType() == TacticType.JOKER) {
+                                System.out.println("You already have a Joker on the board. You cannot play another one.");
+                                player.addCardToHand(card);
+                                return 0;
+                            }
+                        }
+                    }
+                }
+            }
             if (tc.getType() == TacticType.MUD_FIGHT || tc.getType() == TacticType.BLIND_MAN_BLUFF) {
                 if (limit.getCombatModeCard() != null) {
                     System.out.println("This limit already has a combat mode card !");
